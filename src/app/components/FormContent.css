@@ -1,0 +1,60 @@
+/* maincontent.css */
+
+.main-content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  
+  .main-content-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #00a1e0; /* Teal or your preferred accent color */
+  }
+  
+  .input-container {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 20px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #00a1e0; /* Teal or your preferred accent color */
+    border-radius: 5px;
+    background-color: #1f1f1f;
+    color: #ffffff;
+    font-size: 1rem;
+    outline: none;
+  }
+  
+  .form-control::placeholder {
+    color: #555555;
+  }
+  
+  .button-container {
+    margin-top: 20px;
+  }
+  
+  .btn-primary {
+    background-color: #00a1e0; /* Teal or your preferred accent color */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0085b8; /* Darker shade of your accent color on hover */
+  }
+  

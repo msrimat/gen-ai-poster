@@ -1,0 +1,16 @@
+/* Header.css */
+
+.header-container {
+    background-color: #333;
+    color: #5679c9;
+    padding: 20px 0;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header-title {
+    font-size: 2rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  
