@@ -6,17 +6,44 @@ import { collection, onSnapshot } from "firebase/firestore";
 import db from "../db/db";
 import { FormEventHandler } from "react";
 import axios from "axios";
+import { set } from "firebase/database";
 
 const FormContent: React.FC = () => {
   const [posterName, setPosterName] = useState("");
   const [imgs, setImgs] = useState<{ createdAt: any; imgUrl: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [response, setResponse] = useState("");
+
+  const TOKEN = "fc8df018-1c32-4b46-b250-4606bbc9b289";
+  const endpoint = "https://api.thenextleg.io/v2";
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     let poster = (event.currentTarget[0] as HTMLInputElement).value;
     setPosterName(poster);
     async () => {
-      let r = (await axios.post("../api/webhook", { poster })) as any;
+      let headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
+      };
+      setLoading(true);
+      try {
+        let r = (await axios.post(
+          endpoint,
+          {
+            cmd: "imagine",
+            msg: poster,
+          },
+          { headers: headers }
+        )) as any;
+        console.log(r.data);
+        setResponse(JSON.stringify(r.data));
+      } catch (e) {
+        console.log(e);
+        setError(e as any);
+      }
+      setLoading(false);
     };
   };
 
@@ -45,17 +72,11 @@ const FormContent: React.FC = () => {
         />
       </div>
       <div className="button-container">
-        <button
-          type="submit"
-          className="btn btn-primary"
-          onClick={async () => {
-            let r = (await axios.post("../api/webhook", { name })) as any;
-            console.log(r.data);
-          }}
-        >
-          Submit
+        <button type="submit" className="btn btn-primary">
+          {loading ? "Loading..." : "Generate"}
         </button>
       </div>
+      <pre>Response Message: {response}</pre>
       <div>
         <h1 className="text-3xl pt-8">These are your posters!</h1>
         <div className="grid grid-cols-3 gap-4">

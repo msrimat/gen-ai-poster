@@ -25,9 +25,7 @@ import db from "@/app/db/db";
 import { addDoc, collection, doc, Firestore } from "firebase/firestore";
 
 export async function POST(request: Request) {
-  const {
-    imageUrl = "https://www.katdootje.nl/wp-content/uploads/kartierr_Maincoon_cat_very_clear_eyes_ultra_realistic_in_a_gian_1a6833b6-35d2-43bf-9cc0-6bc4d1898999.png",
-  } = request.body as any;
+  const { imageUrl } = request.body as any;
   await addDoc(collection(db, "imgs"), {
     imgUrl: imageUrl,
     createdAt: new Date().toISOString(), //not all clients will have the same time
