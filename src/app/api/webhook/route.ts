@@ -22,25 +22,13 @@
 // }
 
 import db from "@/app/db/db";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, Firestore } from "firebase/firestore";
 
-export default async function POST(req: any, res: any) {
-  try {
-    const { imageUrl } = req.body as any;
-    console.log(req.body);
-
-    if (!imageUrl) {
-      throw new Error("imageUrl is missing from the request body");
-    }
-
-    await addDoc(collection(db, "imgs"), {
-      imgUrl: imageUrl,
-      createdAt: new Date(), // serverTimestamp() -> Not all clients will have the same time
-    });
-
-    res.status(200).json({ message: "Image added successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+export async function POST(request: Request) {
+  const { imageUrl } = request.body as any;
+  await addDoc(collection(db, "imgs"), {
+    imgUrl: imageUrl,
+    createdAt: new Date().toISOString(), //not all clients will have the same time
+  });
+  return new Response("Hello der");
 }
