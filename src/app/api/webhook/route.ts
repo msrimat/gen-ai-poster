@@ -22,13 +22,16 @@
 // }
 
 import db from "@/app/db/db";
-import { addDoc, collection, doc, Firestore } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 
-export async function POST(request: Request) {
-  const { imageUrl } = request.body as any;
+export default async function handler(req: any, res: any) {
+  const { imageUrl } = req.body as any;
+  console.log(req.body);
+
   await addDoc(collection(db, "imgs"), {
     imgUrl: imageUrl,
-    createdAt: new Date().toISOString(), //not all clients will have the same time
+    createdAt: new Date(), // serverTimestamp() -> Not all clients will have the same time
   });
-  return new Response("Hello der");
+
+  res.status(200).json({ name: "John Doe" });
 }

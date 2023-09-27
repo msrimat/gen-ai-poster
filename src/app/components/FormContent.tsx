@@ -1,6 +1,11 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState } from "react";
+import React, {
+  FormEvent,
+  MouseEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import "./FormContent.css"; // Import your custom CSS styles for the component
 import { collection, onSnapshot } from "firebase/firestore";
 import db from "../db/db";
@@ -16,36 +21,7 @@ const FormContent: React.FC = () => {
   const [response, setResponse] = useState("");
 
   const TOKEN = "fc8df018-1c32-4b46-b250-4606bbc9b289";
-  const endpoint = "https://api.thenextleg.io/v2";
-
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
-    event.preventDefault();
-    let poster = (event.currentTarget[0] as HTMLInputElement).value;
-    setPosterName(poster);
-    async () => {
-      let headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${TOKEN}`,
-      };
-      setLoading(true);
-      try {
-        let r = (await axios.post(
-          endpoint,
-          {
-            cmd: "imagine",
-            msg: poster,
-          },
-          { headers: headers }
-        )) as any;
-        console.log(r.data);
-        setResponse(JSON.stringify(r.data));
-      } catch (e) {
-        console.log(e);
-        setError(e as any);
-      }
-      setLoading(false);
-    };
-  };
+  const endpoint = `https://api.thenextleg.io/v2`;
 
   useEffect(() => {
     onSnapshot(collection(db, "imgs"), (snapshot) => {
@@ -60,7 +36,7 @@ const FormContent: React.FC = () => {
   }, []);
 
   return (
-    <form onSubmit={handleSubmit} className="main-content-container">
+    <div className="main-content-container">
       <h1 className="main-content-title">Generate a Poster</h1>
       <div className="input-container">
         <input
@@ -69,10 +45,40 @@ const FormContent: React.FC = () => {
           className="form-control"
           autoComplete="off"
           placeholder="Enter text here"
+          value={posterName}
+          onChange={(e) => setPosterName(e.target.value)}
         />
       </div>
       <div className="button-container">
-        <button type="submit" className="btn btn-primary">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={async () => {
+            console.log(`Submitting my prompt: ${posterName}`);
+            setLoading(true);
+            try {
+              let headers = {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${TOKEN}`,
+              };
+
+              let r = await axios.post(
+                `${endpoint}`,
+                {
+                  cmd: "imagine",
+                  msg: posterName,
+                },
+                { headers }
+              );
+              console.log(r.data);
+              setResponse(JSON.stringify(r.data, null, 2));
+            } catch (e: any) {
+              console.log(e);
+              setError(e.message);
+            }
+            setLoading(false);
+          }}
+        >
           {loading ? "Loading..." : "Generate"}
         </button>
       </div>
@@ -90,8 +96,11 @@ const FormContent: React.FC = () => {
           ))}
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 
 export default FormContent;
+function setImgs(dbImgs: { createdAt: any; imgUrl: string }[]) {
+  throw new Error("Function not implemented.");
+}
