@@ -12,6 +12,8 @@ import db from "../db/db";
 import { FormEventHandler } from "react";
 import axios from "axios";
 import { set } from "firebase/database";
+import { addDoc } from "firebase/firestore";
+import LoadingBar from "react-top-loading-bar";
 
 const FormContent: React.FC = () => {
   const [posterName, setPosterName] = useState("");
@@ -19,9 +21,19 @@ const FormContent: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [response, setResponse] = useState("");
+  const [barProgress, setBarProgress] = useState(0);
 
-  const TOKEN = "fc8df018-1c32-4b46-b250-4606bbc9b289";
-  const endpoint = `https://api.thenextleg.io/v2`;
+  interface ImageResponse {
+    progress: number | "incomplete";
+    progressImageUrl?: string;
+  }
+
+  const endpoint = "https://api.thenextleg.io/v2";
+  const TOKEN = "4f5debac-f51c-4205-8eb0-33d68819916f";
+  const headers = {
+    Authorization: `Bearer ${TOKEN}`,
+    "Content-Type": "application/json",
+  };
 
   useEffect(() => {
     onSnapshot(collection(db, "imgs"), (snapshot) => {
@@ -35,9 +47,63 @@ const FormContent: React.FC = () => {
     });
   }, []);
 
+  const sleep = (milliseconds: number) => {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  };
+
+  let fetchToCompletion = async (
+    messageId: string,
+    retryCount: number,
+    maxRetry: number = 20
+  ) => {
+    const { data } = await axios.get(`${endpoint}/message/${messageId}`, {
+      headers: headers,
+    });
+
+    if (data.progress === 100) {
+      return data;
+    }
+
+    if (data.progress === "incomplete") {
+      throw new Error("Image generation failed");
+    }
+
+    if (retryCount > maxRetry) {
+      throw new Error("Max retries exceeded");
+    }
+
+    await sleep(5000);
+    return fetchToCompletion(messageId, retryCount + 1);
+  };
+
+  const generateImage = async () => {
+    try {
+      const { data: imageResponseData } = await axios.post(
+        `${endpoint}/imagine`,
+        { msg: posterName },
+        { headers: headers }
+      );
+      console.log("IMAGE GENERATION MESSAGE DATA:", imageResponseData);
+
+      const completedImageData = await fetchToCompletion(
+        imageResponseData.messageId,
+        0
+      );
+
+      console.log("COMPLETED IMAGE DATA:", completedImageData);
+      let imageUrl = completedImageData.response.imageUrls[0];
+      await addDoc(collection(db, "imgs"), {
+        imgUrl: imageUrl,
+        createdAt: new Date().toISOString(), //not all clients will have the same time
+      });
+    } catch (error) {
+      console.error("Error generating image:", error);
+    }
+  };
+
   return (
     <div className="main-content-container">
-      <h1 className="main-content-title">Generate a Poster</h1>
+      <h1 className="main-content-title p-8">Generate a Poster</h1>
       <div className="input-container">
         <input
           id="name"
@@ -53,39 +119,33 @@ const FormContent: React.FC = () => {
         <button
           type="button"
           className="btn btn-primary"
-          onClick={async () => {
-            console.log(`Submitting my prompt: ${posterName}`);
+          onClick={() => {
+            setBarProgress(10);
             setLoading(true);
-            try {
-              let headers = {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${TOKEN}`,
-              };
 
-              let r = await axios.post(
-                `${endpoint}`,
-                {
-                  cmd: "imagine",
-                  msg: posterName,
-                },
-                { headers }
-              );
-              console.log(r.data);
-              setResponse(JSON.stringify(r.data, null, 2));
-            } catch (e: any) {
-              console.log(e);
-              setError(e.message);
-            }
-            setLoading(false);
+            const intervalId = setInterval(() => {
+              setBarProgress((prevProgress) => {
+                const newProgress =
+                  prevProgress === 95 ? 95 : prevProgress + 0.25;
+                return newProgress;
+              });
+            }, 100);
+            setTimeout(() => {
+              clearInterval(intervalId);
+            }, 38000);
+
+            generateImage().then(() => {
+              setLoading(false);
+              setBarProgress(100);
+            });
           }}
         >
           {loading ? "Loading..." : "Generate"}
         </button>
       </div>
-      <pre>Response Message: {response}</pre>
+      <LoadingBar progress={barProgress} />
       <div>
-        <h1 className="text-3xl pt-8">These are your posters!</h1>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4 p-8">
           {imgs.map((img) => (
             <img
               src={img.imgUrl}
@@ -101,6 +161,3 @@ const FormContent: React.FC = () => {
 };
 
 export default FormContent;
-function setImgs(dbImgs: { createdAt: any; imgUrl: string }[]) {
-  throw new Error("Function not implemented.");
-}

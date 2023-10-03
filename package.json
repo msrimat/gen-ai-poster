@@ -13,10 +13,11 @@
     "axois": "^0.0.1-security",
     "bootstrap": "^5.3.2",
     "firebase": "^10.4.0",
-    "firestore": "^1.1.6",
+    "forprogress": "^2.1.5",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-top-loading-bar": "^2.3.1"
   },
   "devDependencies": {
     "@types/node": "latest",

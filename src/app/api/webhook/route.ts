@@ -25,6 +25,7 @@ import db from "@/app/db/db";
 import { addDoc, collection, doc, Firestore } from "firebase/firestore";
 
 export async function POST(request: Request) {
+  console.log("HIT");
   const { imageUrl } = request.body as any;
   await addDoc(collection(db, "imgs"), {
     imgUrl: imageUrl,

@@ -1,16 +1,25 @@
 /* Header.css */
 
+/* Header styles */
 .header-container {
-    background-color: #333;
-    color: #5679c9;
-    padding: 20px 0;
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
-  
-  .header-title {
-    font-size: 2rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-  }
-  
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 30px;
+  background-color: #333;
+  color: #fff;
+}
+
+.header-container .logo {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.header-container nav a {
+  margin-left: 20px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.header-container nav a:hover {
+  text-decoration: underline;
+}
